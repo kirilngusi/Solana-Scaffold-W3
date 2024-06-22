@@ -1,10 +1,10 @@
-import React, {useState, useMemo, useEffect} from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Keypair, Transaction } from "@solana/web3.js";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { InfinitySpin } from "react-loader-spinner";
 import IPFSDownload from "./IpfsDownload";
-import {addOrder, fetchItem, hasPurchased} from "../lib/api";
-import {findReference, FindReferenceError} from "@solana/pay";
+import { addOrder, fetchItem, hasPurchased } from "../lib/api";
+import { findReference, FindReferenceError } from "@solana/pay";
 
 const STATUS = {
     Initial: "Initial",
@@ -53,9 +53,20 @@ export default function Buy({ itemID, coin }) {
         try {
             // Send the transaction to the network
             const txHash = await sendTransaction(tx, connection);
-            console.log(`Transaction sent: https://solscan.io/tx/${txHash}?cluster=devnet`);
-            // Even though this could fail, we're just going to set it to true for now
+            console.log(`Transaction sent: https://explorer.solana.com/tx/${txHash}?cluster=devnet`);
             setStatus(STATUS.Submitted);
+
+            // Check if transaction was confirmed
+            const confirmation = await connection.confirmTransaction(txHash, 'finalized');
+            if (confirmation.value.err) {
+                throw new Error('Transaction failed');
+            }
+
+            console.log('Transaction confirmed:', confirmation);
+            setStatus(STATUS.Paid);
+            addOrder(order);
+            alert("Thank you for your purchase!");
+
         } catch (error) {
             console.error(error);
         } finally {
@@ -80,35 +91,6 @@ export default function Buy({ itemID, coin }) {
     }, [publicKey, itemID, coin]);
 
     useEffect(() => {
-        // Check if transaction was confirmed
-        if (status === STATUS.Submitted) {
-            setLoading(true);
-            const interval = setInterval(async () => {
-                try {
-                    const result = await findReference(connection, orderID);
-                    console.log("Finding tx reference", result.confirmationStatus);
-                    if (result.confirmationStatus === "confirmed" || result.confirmationStatus === "finalized") {
-                        clearInterval(interval);
-                        setStatus(STATUS.Paid);
-                        console.log('Item set :' + STATUS.Paid)
-                        addOrder(order);
-                        setLoading(false);
-                        alert("Thank you for your purchase!");
-                    }
-                } catch (e) {
-                    if (e instanceof FindReferenceError) {
-                        return null;
-                    }
-                    console.error("Unknown error", e);
-                } finally {
-                    setLoading(false);
-                }
-            }, 1000);
-            return () => {
-                clearInterval(interval);
-            };
-        }
-
         async function getItem(itemID) {
             const item = await fetchItem(itemID);
             setItem(item);
@@ -116,7 +98,6 @@ export default function Buy({ itemID, coin }) {
         }
 
         if (status === STATUS.Paid) {
-            console.log('Item set :' + itemID)
             getItem(itemID);
         }
     }, [status]);
@@ -139,7 +120,7 @@ export default function Buy({ itemID, coin }) {
                 <IPFSDownload filename={item?.filename} hash={item?.hash} />
             ) : (
                 <button disabled={loading} className="buy-button" onClick={processTransaction}>
-                    Buy now 🠚
+                    Buy now
                 </button>
             )}
         </div>

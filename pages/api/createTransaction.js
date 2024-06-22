@@ -16,7 +16,7 @@ import { createTransferCheckedInstruction, getAssociatedTokenAddress, getMint } 
 const usdcAddress = new PublicKey("Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr");
 // EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v (main network)
 
-const sellerAddress = '4KxvAbAHwoLf3po72Js57XCzjfHpKHV46hmV5Bo31pEE'
+const sellerAddress = 'CmJUL5ckTurxuMPkTZhD4FqBtKHhKQQmG9uHv3xDSMyH'
 const sellerPublicKey = new PublicKey(sellerAddress);
 
 const createTransaction = async (req, res) => {
