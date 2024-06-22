@@ -117,10 +117,15 @@ export default function Buy({ itemID, coin }) {
     return (
         <div>
             { status === STATUS.Paid  && item ? (
-                <IPFSDownload filename={item?.filename} hash={item?.hash} />
+              <>
+                  <IPFSDownload filename={item?.filename} hash={item?.hash}/>
+                  <button disabled={loading} className="buy-button mt-4" onClick={processTransaction} >
+                      Mua lại
+                  </button>
+              </>
             ) : (
                 <button disabled={loading} className="buy-button" onClick={processTransaction}>
-                    Buy now
+                    Mua ngay
                 </button>
             )}
         </div>

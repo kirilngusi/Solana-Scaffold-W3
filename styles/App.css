@@ -147,6 +147,10 @@ button:disabled {
   cursor: pointer;
 }
 
+.mt-4 {
+  margin-top: 10px;
+}
+
 .create-product-button{
   margin: 10px;
   border: 0;
